@@ -52,14 +52,7 @@ if (isset($_GET['logout'])) { session_destroy(); header('Location: ?'); exit; }
 if (empty($_SESSION['auth'])) {
     ?><!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>VPS Manager</title>
     <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(160deg,#dfd9cf 0%,#ebe5d9 40%,#f5f0e8 100%);color:#2d3748;display:flex;align-items:center;justify-content:center;min-height:100vh}.box{background:#fafaf7;padding:44px 40px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.06);width:400px;max-width:92%;border-top:4px solid #1e3a5f}.box h1{text-align:center;color:#1a365d;margin-bottom:4px;font-size:24px;font-weight:800}.box p{text-align:center;color:#718096;font-size:13px;margin-bottom:28px}input[type=text],input[type=password]{width:100%;padding:14px 16px;border-radius:10px;border:2px solid #e2ddd5;background:#fdfcfb;color:#2d3748;font-size:15px;outline:none;margin-bottom:14px;transition:all .2s}input:focus{border-color:#2c5282;box-shadow:0 0 0 3px rgba(44,82,130,.12)}.btn{width:100%;padding:14px;border-radius:10px;background:linear-gradient(135deg,#1e3a5f,#2c5282);color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(30,58,95,.25)}.btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(30,58,95,.35)}.btn:active{transform:translateY(0)}</style>
-    </head><body><div class="box"><h1><span style="font-family:monospace;font-size:8px;display:block;line-height:1.15;color:#c8a96e;margin-bottom:6px">▄████████▄
-██▀▌░░░░▐▀██
-█▌░░▄████▄░░▐█
-█░░▐█▌░░▐█▌░░█
-▐▌░░████████░▐▌
-▐▌░░░░▀▀▀▀░░░▐▌
-█▄░░░░▐▌░░░▄█
-▀█▄▄▄▄▄▄▄█▀</span>VPS Manager</h1><p>Server Management Panel</p><form method="POST"><input type="text" name="user" placeholder="Username" style="margin-bottom:10px;border-radius:10px;padding:14px 16px;width:100%;border:2px solid #e2ddd5;background:#fdfcfb;color:#2d3748;font-size:15px;outline:none;transition:all .2s" autofocus><input type="password" name="pass" placeholder="Password"><button class="btn" style="margin-top:4px">🔑 Login</button></form><?= isset($login_error) ? '<p style="color:#c53030;text-align:center;margin-top:14px;font-size:13px">'.$login_error.'</p>' : '' ?></div></body></html><?php exit;
+    </head><body><div class="box"><h1>🖥️ VPS Manager</h1><p>Server Management Panel</p><form method="POST"><input type="text" name="user" placeholder="Username" style="margin-bottom:10px;border-radius:10px;padding:14px 16px;width:100%;border:2px solid #e2ddd5;background:#fdfcfb;color:#2d3748;font-size:15px;outline:none;transition:all .2s" autofocus><input type="password" name="pass" placeholder="Password"><button class="btn" style="margin-top:4px">🔑 Login</button></form><?= isset($login_error) ? '<p style="color:#c53030;text-align:center;margin-top:14px;font-size:13px">'.$login_error.'</p>' : '' ?></div></body></html><?php exit;
 }
 
 // ===== HELPERS =====
@@ -1583,14 +1576,7 @@ tr:hover td{background:#efe9db}
 <body>
 
 <div class="topbar">
-  <div class="logo"><span style="font-family:monospace;font-size:7px;display:block;line-height:1.15;color:#c8a96e;margin-bottom:2px">▄████████▄
-██▀▌░░░░▐▀██
-█▌░░▄████▄░░▐█
-█░░▐█▌░░▐█▌░░█
-▐▌░░████████░▐▌
-▐▌░░░░▀▀▀▀░░░▐▌
-█▄░░░░▐▌░░░▄█
-▀█▄▄▄▄▄▄▄█▀</span>VPS Manager</div>
+  <div class="logo">🖥️ VPS Manager</div>
   <div class="sysinfo">
     <span><span class="dot <?= $nginx_ok?'dot-ok':'dot-err' ?>"></span>Nginx</span>
     <span><span class="dot <?= $mysql_ok?'dot-ok':'dot-err' ?>"></span>MySQL</span>
