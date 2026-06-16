@@ -91,6 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $root = WWW_ROOT . '/' . $domain;
         if (!is_dir($root)) { mkdir($root, 0755, true); chown($root, 'www-data'); chgrp($root, 'www-data'); }
 
+        // Hapus block config lama untuk domain ini
+        foreach ((array)glob(NGINX_ENABLED . "/*_blocked_*") as $bf) {
+            if (strpos(file_get_contents($bf), "server_name " . $domain) !== false) {
+                $ba = NGINX_AVAILABLE . "/" . basename($bf);
+                unlink($bf); if (file_exists($ba)) unlink($ba);
+            }
+        }
+
         // Nginx config
         $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html index.htm;\n\n    client_max_body_size 100M;\n\n    location / {\n        try_files \$uri \$uri/ /index.php?\$query_string;\n    }\n\n    location ~ \\.php\$ {\n        include snippets/fastcgi-php.conf;\n        fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock;\n        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n        include fastcgi_params;\n    }\n\n    location ~ /\\. { deny all; }\n    gzip on;\n    gzip_types text/css application/javascript text/html;\n    gzip_min_length 256;\n}\n";
         file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
