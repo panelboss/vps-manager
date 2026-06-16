@@ -17,7 +17,7 @@ Panel runs at `http://YOUR_IP:8080`
 
 ---
 
-## ✨ Features (23 Menus)
+## ✨ Features (24 Menus)
 
 ### 📊 Main
 Dashboard · Websites · Databases
@@ -26,7 +26,7 @@ Dashboard · Websites · Databases
 Backup & Restore · Services · PHP Multi-version · SSL · Monitor · Firewall · File Manager · Logs · Cron Jobs · Optimize
 
 ### 🔧 Tools
-Redirects (301/302) · Cache (FastCGI Purge) · Uptime Monitor · Security (Fail2Ban)
+Redirects (301/302) · Cache (FastCGI Purge) · Uptime Monitor · Security (Fail2Ban) · Web Terminal
 
 ### ☁️ Advanced
 Cloud Backup (Mega.nz / Google Drive via Rclone) · PHP Settings per Site · DNS Manager (Cloudflare API) · System Migration
@@ -42,6 +42,13 @@ Full system backup and restore for seamless VPS-to-VPS migration:
 - Migration file format: `migration-VPS-HOSTNAME-YYYYMMDD-HHMMSS.tar.gz`
 - Compatible between VPS instances running the same panel
 
+### 💻 Web Terminal (NEW)
+Browser-based terminal access — no more PuTTY needed:
+- Powered by [ttyd](https://github.com/tsl0922/ttyd) (port 8081)
+- Full bash shell, embedded via iframe
+- Runs via PM2 alongside the panel
+- Single binary, minimal footprint
+
 ---
 
 ## 📋 Requirements
@@ -52,8 +59,8 @@ Full system backup and restore for seamless VPS-to-VPS migration:
 ---
 
 ## 📁 Tech Stack
-- Single-file PHP (~3700 lines)
-- Nginx + MariaDB + PHP 8.1-FPM
+- Single-file PHP (~3750 lines)
+- Nginx + MariaDB + PHP 8.1-FPM + ttyd
 
 ---
 
