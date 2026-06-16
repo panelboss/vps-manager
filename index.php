@@ -1,3 +1,4 @@
+Warning: Permanently added '159.65.232.23' (ED25519) to the list of known hosts.
 <?php
 session_start();
 define('PASSWD_FILE', '/var/www/manager/.passwd');
@@ -92,8 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Nginx config
         $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html index.htm;\n\n    client_max_body_size 100M;\n\n    location / {\n        try_files \$uri \$uri/ /index.php?\$query_string;\n    }\n\n    location ~ \\.php\$ {\n        include snippets/fastcgi-php.conf;\n        fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock;\n        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n        include fastcgi_params;\n    }\n\n    location ~ /\\. { deny all; }\n    gzip on;\n    gzip_types text/css application/javascript text/html;\n    gzip_min_length 256;\n}\n";
-        file_put_contents(NGINX_AVAILABLE . "/$cfg_name", $nginx_conf);
-        symlink(NGINX_AVAILABLE . "/$cfg_name", NGINX_ENABLED . "/$cfg_name");
+        file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
+        symlink(NGINX_AVAILABLE . "/$domain", NGINX_ENABLED . "/$domain");
         
         // Create index.html placeholder
         file_put_contents("$root/index.html", "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>$domain</title><style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8fafc;color:#1e293b}div{text-align:center}h1{color:#1e3a5f}</style></head><body><div><h1>🚀 $domain</h1><p>Website siap! Upload file Anda ke folder <code>/var/www/$domain</code></p></div></body></html>");
@@ -146,10 +147,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $domain = $_POST['domain'] ?? '';
         $cfg_name = $_POST['cfg_name'] ?? $domain;
         if (empty($domain)) { flash('Domain tidak valid', 'err'); redirect('websites'); }
-        if (file_exists(NGINX_ENABLED . "/$cfg_name")) unlink(NGINX_ENABLED . "/$cfg_name");
-        if (file_exists(NGINX_AVAILABLE . "/$cfg_name")) unlink(NGINX_AVAILABLE . "/$cfg_name");
+
+        // Check shared config warning
+        $shared_warning = '';
+        $cfg_path = NGINX_AVAILABLE . "/$cfg_name";
+        if (file_exists($cfg_path)) {
+            preg_match_all('/server_name\s+([^;]+);/', file_get_contents($cfg_path), $m);
+            $all_domains = preg_split('/\s+/', trim(implode(' ', $m[1] ?? [])));
+            $other_domains = array_filter($all_domains, function($d) use ($domain) { return $d !== $domain && strpos($d, 'www.') === false; });
+            if (!empty($other_domains)) {
+                $shared_warning = ' ⚠️ Config ' . $cfg_name . ' juga melayani: ' . implode(', ', $other_domains) . '. Hapus manual jika perlu.';
+            }
+        }
+
+        // 1. Delete Nginx config
+        $nginx_del = false;
+        if (file_exists(NGINX_ENABLED . "/$cfg_name")) { unlink(NGINX_ENABLED . "/$cfg_name"); $nginx_del = true; }
+        if (file_exists(NGINX_AVAILABLE . "/$cfg_name")) { unlink(NGINX_AVAILABLE . "/$cfg_name"); $nginx_del = true; }
+
+        // 2. Delete website files
+        $www_dir = WWW_ROOT . '/' . $domain;
+        $files_del = false;
+        if (is_dir($www_dir)) { cmd('rm -rf ' . escapeshellarg($www_dir)); $files_del = !is_dir($www_dir); }
+
+        // 3. Delete SSL cert
+        $ssl_del = false;
+        $cd = "/etc/letsencrypt/live/$domain";
+        if (is_dir($cd)) { cmd("certbot delete --cert-name $domain --non-interactive 2>/dev/null"); $ssl_del = !is_dir($cd); }
+
+        // 4. Reload nginx
         cmd("nginx -t && systemctl reload nginx");
-        $www_dir = WWW_ROOT . '/' . $domain; $file_msg = is_dir($www_dir) ? " (File di /var/www/$domain TIDAK dihapus)" : ""; flash("✅ Site $domain dihapus!" . $file_msg); redirect('websites');
+
+        // Summary
+        $msg = "✅ Site $domain dihapus!";
+        $parts = [];
+        if ($nginx_del) $parts[] = 'Nginx config';
+        if ($files_del) $parts[] = 'File /var/www/'.$domain;
+        if ($ssl_del) $parts[] = 'SSL certificate';
+        if ($parts) $msg .= ' (' . implode(', ', $parts) . ')';
+        if ($shared_warning) $msg .= $shared_warning;
+        $msg .= ' | ℹ️ Database tidak dihapus (hapus manual dari menu Databases)';
+        flash($msg); redirect('websites');
     }
 
     // --- CREATE DATABASE ---
@@ -261,12 +299,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Create nginx config if not exists
-        if (!file_exists(NGINX_AVAILABLE . "/$cfg_name")) {
+        if (!file_exists(NGINX_AVAILABLE . "/$domain")) {
             $root = WWW_ROOT . '/' . $domain;
             $php_ver = trim(cmd("php -r 'echo PHP_MAJOR_VERSION.\".\".PHP_MINOR_VERSION;'"));
             $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html;\n    client_max_body_size 100M;\n    location / { try_files \$uri \$uri/ /index.php?\$query_string; }\n    location ~ \\.php\$ { include snippets/fastcgi-php.conf; fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock; fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name; include fastcgi_params; }\n    location ~ /\\. { deny all; }\n}\n";
-            file_put_contents(NGINX_AVAILABLE . "/$cfg_name", $nginx_conf);
-            symlink(NGINX_AVAILABLE . "/$cfg_name", NGINX_ENABLED . "/$cfg_name");
+            file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
+            symlink(NGINX_AVAILABLE . "/$domain", NGINX_ENABLED . "/$domain");
             cmd("nginx -t && systemctl reload nginx");
         }
         flash("✅ Website $domain berhasil di-restore!"); redirect('backups');
@@ -1613,7 +1651,6 @@ tr:hover td{background:#efe9db}
   <?= nav_link('security', '🛡️', 'Security', $page) ?>
   <?= nav_link('cloudbackup', '☁️', 'Cloud Backup', $page) ?>
   <?= nav_link('migration', '🔄', 'Migration', $page) ?>
-  <?= nav_link('terminal', '💻', 'Terminal', $page) ?>
   <?= nav_link('phpsite', '⚡', 'PHP per Site', $page) ?>
   <?= nav_link('dns', '🌍', 'DNS', $page) ?>
   <?php if (is_admin()): ?><?= nav_link('users', '👥', 'Users', $page) ?><?php endif; ?>
@@ -1720,7 +1757,7 @@ elseif ($page === 'websites'):
       <td>
         <a href="http://<?= $s['domain'] ?>" target="_blank" class="btn btn-blue btn-xs">🔗</a>
         <a href="?page=backups" class="btn btn-yellow btn-xs">💾</a>
-        <form method="POST" style="display:inline" onsubmit="return confirm('Hapus Nginx config untuk <?= sanitize($s['domain']) ?>? File tidak akan dihapus.')">
+        <form method="POST" style="display:inline" onsubmit="return confirm('Hapus semua data untuk <?= sanitize($s['domain']) ?>? DB tidak dihapus.')">
           <input type="hidden" name="action" value="delete_site">
           <input type="hidden" name="domain" value="<?= sanitize($s['domain']) ?>">
           <input type="hidden" name="cfg_name" value="<?= sanitize($s['cfg_name']) ?>">
@@ -1797,13 +1834,13 @@ elseif ($page === 'websites'):
     <h3 style="margin-bottom:16px">🗑️ Delete Nginx Config</h3>
     <form method="POST">
       <input type="hidden" name="action" value="delete_site">
-      <div class="form-group" style="margin-bottom:16px">
       <input type="hidden" name="cfg_name" id="modal_cfg_name" value="">
+      <div class="form-group" style="margin-bottom:16px">
         <label>Domain</label>
-        <select name="domain" onchange="this.form.cfg_name.value=this.selectedOptions[0].getAttribute('data-cfg')" style="width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px">
+        <select name="domain" onchange="var o=this.selectedOptions[0];if(o)this.form.cfg_name.value=o.dataset.cfg" style="width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px">
           <?php foreach($sites as $s): ?><option value="<?= sanitize($s['domain']) ?>" data-cfg="<?= sanitize($s['cfg_name']) ?>"><?= sanitize($s['domain']) ?></option><?php endforeach; ?>
         </select>
-        <small style="color:var(--red)">Hanya hapus Nginx config, file website TIDAK dihapus</small>
+        <small style="color:var(--red)">Hapus Nginx config, file, & SSL. Database TIDAK dihapus.</small>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button type="button" onclick="hideModal('deleteSiteModal')" class="btn btn-gray">Batal</button>
@@ -3574,20 +3611,6 @@ elseif ($page === 'migration'):
   <?php endif; ?>
 </div>
 
-<?php
-// ===== TERMINAL =====
-elseif ($page === 'terminal'):
-?>
-<div class="card">
-  <h2>💻 Web Terminal</h2>
-  <p style="color:#888;margin-bottom:16px">Full terminal access via browser. Type <code>exit</code> to close session, <code>Ctrl+C</code> to interrupt.</p>
-  <div style="border:2px solid #1e3a5f;border-radius:12px;overflow:hidden;background:#1a1a2e">
-    <iframe id="terminal-frame" style="width:100%;height:520px;border:0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
-  </div>
-  <script>
-  document.getElementById("terminal-frame").src = "http://" + location.hostname + ":8081";
-  </script>
-</div>
 <?php
 // ===== USER MANAGEMENT =====
 elseif ($page === 'users'):
