@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPS Manager Panel — Single-file PHP server management</title>
+<meta name="description" content="Manage VPS, websites, databases, SSL, DNS, cloud backup, monitoring & web terminal — all from one panel. 24 features, MIT licensed.">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f0e8; color: #333; line-height:1.6; }
+header { background: linear-gradient(135deg, #1e3a5f, #2a5080); color: #fff; padding: 80px 20px; text-align: center; }
+header h1 { font-size: 2.8em; margin-bottom: 10px; }
+header p { font-size: 1.3em; opacity: 0.9; max-width: 700px; margin: 0 auto 30px; }
+.btn { display: inline-block; padding: 14px 32px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 1.05em; transition: transform .15s,box-shadow .15s; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+.btn-dark { background: #fff; color: #1e3a5f; }
+.btn-outline { border: 2px solid rgba(255,255,255,.5); color: #fff; margin-left: 12px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
+h2 { font-size: 2em; color: #1e3a5f; margin-bottom: 30px; text-align: center; }
+.install-box { background: #1a1a2e; color: #a6e3a1; padding: 20px 28px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 0.95em; overflow-x: auto; margin: 20px 0; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.feat-card { background: #fafaf7; border: 1px solid #e2ddd5; border-radius: 12px; padding: 24px; transition: transform .2s; }
+.feat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.feat-card h3 { color: #1e3a5f; margin-bottom: 8px; font-size: 1.15em; }
+.feat-card p { color: #666; font-size: 0.9em; }
+.stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; margin-top: 40px; }
+.stat { text-align: center; }
+.stat-num { font-size: 2.4em; font-weight: 800; color: #1e3a5f; }
+.stat-label { color: #888; font-size: 0.9em; }
+footer { text-align: center; padding: 40px 20px; color: #aaa; font-size: 0.9em; }
+code { background: #1a1a2e; color: #a6e3a1; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
+a { color: #1e3a5f; }
+@media (max-width:600px) { header h1 { font-size: 2em; } .btn-outline { margin-left:0; margin-top:10px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖥️ VPS Manager Panel</h1>
+  <p>Single-file PHP server management. Manage VPS, websites, databases, SSL, DNS, and more — all from one lightweight panel.</p>
+  <a href="https://github.com/panelboss/vps-manager" class="btn btn-dark">⭐ View on GitHub</a>
+  <a href="#install" class="btn btn-outline">🚀 Quick Install</a>
+</header>
+
+<div class="container" id="install">
+  <h2>🚀 One-Command Install</h2>
+  <div class="install-box">bash &lt;(curl -sSL https://raw.githubusercontent.com/panelboss/vps-manager/main/install.sh)</div>
+  <p style="text-align:center;color:#888">Runs on <code>http://YOUR_IP:8080</code> — Ubuntu 20.04 / 22.04 with root access.</p>
+</div>
+
+<div class="container">
+  <h2>✨ 24 Built-in Features</h2>
+  <div class="features">
+    <div class="feat-card"><h3>📊 Dashboard</h3><p>System overview, stats, service status, quick actions at a glance.</p></div>
+    <div class="feat-card"><h3>🌐 Websites</h3><p>Create/delete sites with auto Nginx config, DB, and WordPress setup.</p></div>
+    <div class="feat-card"><h3>🗄️ Databases</h3><p>CRUD MySQL databases and users, table count, size monitoring.</p></div>
+    <div class="feat-card"><h3>💾 Backup & Restore</h3><p>Zip websites + SQL dump, restore from upload — full site snapshots.</p></div>
+    <div class="feat-card"><h3>⚙️ Services</h3><p>Install/start/stop Nginx, MySQL, PHP, phpMyAdmin, Certbot in one click.</p></div>
+    <div class="feat-card"><h3>🐘 PHP Multi-version</h3><p>PHP 5.6–8.4, switch per website, live progress install, set default CLI.</p></div>
+    <div class="feat-card"><h3>🔒 SSL</h3><p>Let's Encrypt via certbot, auto-renew, live progress, per-site status.</p></div>
+    <div class="feat-card"><h3>📈 Monitor</h3><p>Real-time CPU, RAM, disk, network, top processes dashboard.</p></div>
+    <div class="feat-card"><h3>🛡️ Firewall</h3><p>UFW enable/disable, add/delete rules by port, quick security presets.</p></div>
+    <div class="feat-card"><h3>📁 File Manager</h3><p>Browse/edit /var/www, upload files, create folders, delete — all in browser.</p></div>
+    <div class="feat-card"><h3>📜 Logs</h3><p>Nginx access/error per site, syslog, PHP-FPM, MySQL logs viewer.</p></div>
+    <div class="feat-card"><h3>⏰ Cron Jobs</h3><p>Add/delete cron jobs with common presets for automation.</p></div>
+    <div class="feat-card"><h3>🚀 Optimize</h3><p>Auto-tune Nginx + PHP + MySQL + system per RAM tier.</p></div>
+    <div class="feat-card"><h3>🔀 Redirects</h3><p>Add/delete 301/302 redirects per domain with auto nginx validation.</p></div>
+    <div class="feat-card"><h3>🧹 Cache</h3><p>Purge Nginx fastcgi_cache, enable/disable per site, monitor cache size.</p></div>
+    <div class="feat-card"><h3>📡 Uptime Monitor</h3><p>Health check per site, response time, history log, cron every 5 min.</p></div>
+    <div class="feat-card"><h3>🔐 Security</h3><p>Fail2Ban install/status, 3 jails, unban IP from panel.</p></div>
+    <div class="feat-card"><h3>☁️ Cloud Backup</h3><p>Mega.nz / Google Drive via rclone — auto-sync your backups.</p></div>
+    <div class="feat-card"><h3>⚡ PHP per Site</h3><p>Per-website php.ini overrides via .user.ini generation.</p></div>
+    <div class="feat-card"><h3>🌍 DNS Manager</h3><p>Cloudflare API: list zones, CRUD A/AAAA/CNAME/MX/TXT/NS records.</p></div>
+    <div class="feat-card"><h3>🔄 System Migration</h3><p>Full backup & restore — websites, DBs, Nginx, SSL, cron, UFW. VPS-to-VPS.</p></div>
+    <div class="feat-card"><h3>💻 Web Terminal</h3><p>Browser-based bash shell via ttyd — no more PuTTY needed.</p></div>
+    <div class="feat-card"><h3>👥 Multi-User</h3><p>User management with admin/user roles, secure authentication.</p></div>
+    <div class="feat-card"><h3>⚙️ Settings</h3><p>Change password, system info, panel configuration.</p></div>
+  </div>
+</div>
+
+<div class="container" style="text-align:center">
+  <div class="stats">
+    <div class="stat"><div class="stat-num">24</div><div class="stat-label">Features</div></div>
+    <div class="stat"><div class="stat-num">~3750</div><div class="stat-label">Lines of PHP</div></div>
+    <div class="stat"><div class="stat-num">1</div><div class="stat-label">Single File</div></div>
+    <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">License</div></div>
+  </div>
+</div>
+
+<div class="container">
+  <h2>📋 Requirements</h2>
+  <p style="text-align:center;max-width:500px;margin:0 auto;">
+    🐧 Ubuntu 20.04 / 22.04 &nbsp;|&nbsp; 🔑 Root access &nbsp;|&nbsp; 🔌 Port 8080 open
+  </p>
+</div>
+
+<div class="container">
+  <h2>📁 Tech Stack</h2>
+  <p style="text-align:center;">
+    <code>PHP 8.1</code> <code>Nginx</code> <code>MariaDB</code> <code>phpMyAdmin</code> <code>Certbot</code> <code>ttyd</code> <code>rclone</code> <code>PM2</code>
+  </p>
+</div>
+
+<footer>
+  <p>© 2026 <a href="https://github.com/panelboss">PanelBoss</a> · MIT Licensed · <a href="https://github.com/panelboss/vps-manager">GitHub Repo</a></p>
+</footer>
+
+</body>
+</html>
