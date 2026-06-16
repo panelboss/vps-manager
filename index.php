@@ -175,7 +175,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cd = "/etc/letsencrypt/live/$domain";
         if (is_dir($cd)) { cmd("certbot delete --cert-name $domain --non-interactive 2>/dev/null"); $ssl_del = !is_dir($cd); }
 
-        // 4. Reload nginx
+                // 4. Block domain from nginx (return 444 — close connection)
+        $block_conf = "server { listen 80; listen 443 ssl; ssl_certificate /etc/nginx/snippets/snakeoil.conf 2>/dev/null; ssl_certificate_key /etc/nginx/snippets/snakeoil.conf 2>/dev/null; server_name $domain www.$domain; return 444; }";
+        $block_file = '/etc/nginx/sites-available/' . $cfg_name . '_blocked_' . substr(md5($domain), 0, 6);
+        file_put_contents($block_file, $block_conf);
+        symlink($block_file, NGINX_ENABLED . '/' . basename($block_file));
+        // 5. Reload nginx
         cmd("nginx -t 2>/dev/null; systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null");
 
         // Summary
