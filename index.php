@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             file_put_contents("$root/wp-config.php", $wp_config);
         }
 
-        cmd("nginx -t && systemctl reload nginx");
+        cmd("nginx -t 2>/dev/null; systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null");
         $info = "Domain: $domain | Root: $root";
         if ($db_created) {
             $dn2 = $dbname ?: preg_replace('/[.-]/', '_', $domain);
@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (is_dir($cd)) { cmd("certbot delete --cert-name $domain --non-interactive 2>/dev/null"); $ssl_del = !is_dir($cd); }
 
         // 4. Reload nginx
-        cmd("nginx -t && systemctl reload nginx");
+        cmd("nginx -t 2>/dev/null; systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null");
 
         // Summary
         $msg = "✅ Site $domain dihapus!";
@@ -305,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html;\n    client_max_body_size 100M;\n    location / { try_files \$uri \$uri/ /index.php?\$query_string; }\n    location ~ \\.php\$ { include snippets/fastcgi-php.conf; fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock; fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name; include fastcgi_params; }\n    location ~ /\\. { deny all; }\n}\n";
             file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
             symlink(NGINX_AVAILABLE . "/$domain", NGINX_ENABLED . "/$domain");
-            cmd("nginx -t && systemctl reload nginx");
+            cmd("nginx -t 2>/dev/null; systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null");
         }
         flash("✅ Website $domain berhasil di-restore!"); redirect('backups');
     }
