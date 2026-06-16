@@ -92,8 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Nginx config
         $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html index.htm;\n\n    client_max_body_size 100M;\n\n    location / {\n        try_files \$uri \$uri/ /index.php?\$query_string;\n    }\n\n    location ~ \\.php\$ {\n        include snippets/fastcgi-php.conf;\n        fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock;\n        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n        include fastcgi_params;\n    }\n\n    location ~ /\\. { deny all; }\n    gzip on;\n    gzip_types text/css application/javascript text/html;\n    gzip_min_length 256;\n}\n";
-        file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
-        symlink(NGINX_AVAILABLE . "/$domain", NGINX_ENABLED . "/$domain");
+        file_put_contents(NGINX_AVAILABLE . "/$cfg_name", $nginx_conf);
+        symlink(NGINX_AVAILABLE . "/$cfg_name", NGINX_ENABLED . "/$cfg_name");
         
         // Create index.html placeholder
         file_put_contents("$root/index.html", "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>$domain</title><style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8fafc;color:#1e293b}div{text-align:center}h1{color:#1e3a5f}</style></head><body><div><h1>🚀 $domain</h1><p>Website siap! Upload file Anda ke folder <code>/var/www/$domain</code></p></div></body></html>");
@@ -144,11 +144,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- DELETE WEBSITE ---
     if ($act === 'delete_site') {
         $domain = $_POST['domain'] ?? '';
+        $cfg_name = $_POST['cfg_name'] ?? $domain;
         if (empty($domain)) { flash('Domain tidak valid', 'err'); redirect('websites'); }
-        if (file_exists(NGINX_ENABLED . "/$domain")) unlink(NGINX_ENABLED . "/$domain");
-        if (file_exists(NGINX_AVAILABLE . "/$domain")) unlink(NGINX_AVAILABLE . "/$domain");
+        if (file_exists(NGINX_ENABLED . "/$cfg_name")) unlink(NGINX_ENABLED . "/$cfg_name");
+        if (file_exists(NGINX_AVAILABLE . "/$cfg_name")) unlink(NGINX_AVAILABLE . "/$cfg_name");
         cmd("nginx -t && systemctl reload nginx");
-        flash("✅ Site $domain dihapus! (File di /var/www/$domain TIDAK dihapus)"); redirect('websites');
+        $www_dir = WWW_ROOT . '/' . $domain; $file_msg = is_dir($www_dir) ? " (File di /var/www/$domain TIDAK dihapus)" : ""; flash("✅ Site $domain dihapus!" . $file_msg); redirect('websites');
     }
 
     // --- CREATE DATABASE ---
@@ -260,12 +261,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Create nginx config if not exists
-        if (!file_exists(NGINX_AVAILABLE . "/$domain")) {
+        if (!file_exists(NGINX_AVAILABLE . "/$cfg_name")) {
             $root = WWW_ROOT . '/' . $domain;
             $php_ver = trim(cmd("php -r 'echo PHP_MAJOR_VERSION.\".\".PHP_MINOR_VERSION;'"));
             $nginx_conf = "server {\n    listen 80;\n    server_name $domain www.$domain;\n    root $root;\n    index index.php index.html;\n    client_max_body_size 100M;\n    location / { try_files \$uri \$uri/ /index.php?\$query_string; }\n    location ~ \\.php\$ { include snippets/fastcgi-php.conf; fastcgi_pass unix:/var/run/php/php$php_ver-fpm.sock; fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name; include fastcgi_params; }\n    location ~ /\\. { deny all; }\n}\n";
-            file_put_contents(NGINX_AVAILABLE . "/$domain", $nginx_conf);
-            symlink(NGINX_AVAILABLE . "/$domain", NGINX_ENABLED . "/$domain");
+            file_put_contents(NGINX_AVAILABLE . "/$cfg_name", $nginx_conf);
+            symlink(NGINX_AVAILABLE . "/$cfg_name", NGINX_ENABLED . "/$cfg_name");
             cmd("nginx -t && systemctl reload nginx");
         }
         flash("✅ Website $domain berhasil di-restore!"); redirect('backups');
@@ -1722,6 +1723,7 @@ elseif ($page === 'websites'):
         <form method="POST" style="display:inline" onsubmit="return confirm('Hapus Nginx config untuk <?= sanitize($s['domain']) ?>? File tidak akan dihapus.')">
           <input type="hidden" name="action" value="delete_site">
           <input type="hidden" name="domain" value="<?= sanitize($s['domain']) ?>">
+          <input type="hidden" name="cfg_name" value="<?= sanitize($s['cfg_name']) ?>">
           <button class="btn btn-red btn-xs">✕</button>
         </form>
       </td>
@@ -1796,9 +1798,10 @@ elseif ($page === 'websites'):
     <form method="POST">
       <input type="hidden" name="action" value="delete_site">
       <div class="form-group" style="margin-bottom:16px">
+      <input type="hidden" name="cfg_name" id="modal_cfg_name" value="">
         <label>Domain</label>
-        <select name="domain" style="width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px">
-          <?php foreach($sites as $s): ?><option value="<?= sanitize($s['domain']) ?>"><?= sanitize($s['domain']) ?></option><?php endforeach; ?>
+        <select name="domain" onchange="this.form.cfg_name.value=this.selectedOptions[0].getAttribute('data-cfg')" style="width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px">
+          <?php foreach($sites as $s): ?><option value="<?= sanitize($s['domain']) ?>" data-cfg="<?= sanitize($s['cfg_name']) ?>"><?= sanitize($s['domain']) ?></option><?php endforeach; ?>
         </select>
         <small style="color:var(--red)">Hanya hapus Nginx config, file website TIDAK dihapus</small>
       </div>
