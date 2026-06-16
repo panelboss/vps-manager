@@ -1651,6 +1651,7 @@ tr:hover td{background:#efe9db}
   <?= nav_link('security', '🛡️', 'Security', $page) ?>
   <?= nav_link('cloudbackup', '☁️', 'Cloud Backup', $page) ?>
   <?= nav_link('migration', '🔄', 'Migration', $page) ?>
+  <?= nav_link('terminal', '💻', 'Terminal', $page) ?>
   <?= nav_link('phpsite', '⚡', 'PHP per Site', $page) ?>
   <?= nav_link('dns', '🌍', 'DNS', $page) ?>
   <?php if (is_admin()): ?><?= nav_link('users', '👥', 'Users', $page) ?><?php endif; ?>
@@ -3611,6 +3612,20 @@ elseif ($page === 'migration'):
   <?php endif; ?>
 </div>
 
+<?php
+// ===== TERMINAL =====
+elseif ($page === 'terminal'):
+?>
+<div class="card">
+  <h2>💻 Web Terminal</h2>
+  <p style="color:#888;margin-bottom:16px">Full terminal access via browser. Type <code>exit</code> to close, <code>Ctrl+C</code> to interrupt.</p>
+  <div style="border:2px solid #1e3a5f;border-radius:12px;overflow:hidden;background:#1a1a2e">
+    <iframe id="terminal-frame" style="width:100%;height:520px;border:0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+  </div>
+  <script>
+  document.getElementById("terminal-frame").src = "http://" + location.hostname + ":8081";
+  </script>
+</div>
 <?php
 // ===== USER MANAGEMENT =====
 elseif ($page === 'users'):
