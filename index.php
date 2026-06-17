@@ -65,7 +65,7 @@ function cmd($cmd, $timeout = 30) {
         return "ERROR: Command not allowed: $base";
     }
     return shell_exec("timeout $timeout $cmd 2>&1") ?? '';
-}
+
 }
 function sanitize($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 function flash_html($s) { return strip_tags($s, '<b><i><code><small><br><pre><span><details><summary><strong><em>'); }
@@ -3230,8 +3230,6 @@ elseif ($page === 'security'):
 </div>
 <?php endif; ?>
 <?php endif; ?>
-
-
 <?php
 // ===== CLOUD BACKUP =====
 elseif ($page === 'cloudbackup'):
