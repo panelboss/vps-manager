@@ -7,24 +7,10 @@ INDEX_PATH = os.path.join(WORKDIR, 'index.php')
 INSTALL_CORE_PATH = os.path.join(WORKDIR, 'install-core.sh')
 INSTALL_SH_PATH = os.path.join(WORKDIR, 'install.sh')
 
-# Step 1: Get existing install.sh from GitHub  
-INSTALL_SH_URL = "https://raw.githubusercontent.com/panelboss/vps-manager/main/install.sh"
-print(f"📥 Fetching existing install.sh from GitHub...")
-import urllib.request
-existing = urllib.request.urlopen(INSTALL_SH_URL).read().decode('utf-8')
-
-# Step 2: Extract install-core.sh from existing install.sh
-# install.sh format: Line 1 = shebang, Line 2 = echo "BASE64" | base64 -d | gunzip | bash
-print(f"📦 Decoding install-core.sh...")
-lines = existing.strip().split('\n')
-# Line 2 contains the base64
-m = re.search(r'echo "([^"]+)"', lines[1])
-if not m:
-    print("ERROR: Cannot find base64 block in install.sh")
-    sys.exit(1)
-core_b64 = m.group(1)
-core_gz = base64.b64decode(core_b64)
-core_sh = gzip.decompress(core_gz).decode('utf-8')
+# Step 1: Read LOCAL install-core.sh (the canonical source)
+print(f"📄 Reading local install-core.sh...")
+with open(INSTALL_CORE_PATH, 'r') as f:
+    core_sh = f.read()
 
 print(f"   install-core.sh: {len(core_sh.split(chr(10)))} lines, {len(core_sh):,} bytes")
 
