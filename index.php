@@ -1213,6 +1213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
     // --- MIGRATION: CREATE FULL BACKUP ---
+    $act = $_POST['action'] ?? '';
     if ($act === 'migration_backup') {
         $include_ssl = isset($_POST['include_ssl']) && $_POST['include_ssl'] === '1';
         $ts = date('Ymd_His');
