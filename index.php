@@ -56,17 +56,7 @@ if (empty($_SESSION['auth'])) {
 }
 
 // ===== HELPERS =====
-function cmd($cmd, $timeout = 30) {
-    $allowed = explode(' ', 'apt-get systemctl nginx mysql php certbot iptables ufw curl wget df free ps kill top du ls rm mkdir cp mv chmod chown tar unzip zip find grep cat head tail echo date hostname uptime who whoami id pgrep killall ip ss netstat lsof systemd-analyze timedatectl journalctl');
-    $parts = explode(' ', trim($cmd));
-    $base = str_replace(['./','../'], '', $parts[0]);
-    $base = basename($base);
-    if (!in_array($base, $allowed) && !preg_match('/^(php|python|node|npm|git|composer|mysql|mysqldump|pg_dump|psql|redis-cli|fail2ban|supervisorctl|service|curl|wget)$/', $base)) {
-        return "ERROR: Command not allowed: $base";
-    }
-    return shell_exec("timeout $timeout $cmd 2>&1") ?? '';
-
-}
+function cmd($cmd) { return shell_exec($cmd . ' 2>&1'); }
 function sanitize($s) { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 function flash_html($s) { return strip_tags($s, '<b><i><code><small><br><pre><span><details><summary><strong><em>'); }
 function flash($m, $t = 'ok') { $_SESSION['flash'] = ['msg' => $m, 'type' => $t]; }
@@ -3230,6 +3220,8 @@ elseif ($page === 'security'):
 </div>
 <?php endif; ?>
 <?php endif; ?>
+
+
 <?php
 // ===== CLOUD BACKUP =====
 elseif ($page === 'cloudbackup'):
